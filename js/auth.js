@@ -11,14 +11,14 @@ class Auth {
                 activo: true
             }
         ];
-        this.usuarioActual = this.cargarSesion();  // Cargar la sesión almacenada
+        this.usuarioActual = JSON.parse(localStorage.getItem('usuarioActual')) || null;
     }
 
     login(usuario, contraseña) {
         const usuarioEncontrado = this.usuarios.find(u => u.usuario === usuario && u.contraseña === contraseña && u.activo);
         if (usuarioEncontrado) {
             this.usuarioActual = usuarioEncontrado;
-            this.guardarSesion(usuarioEncontrado);  // Guardar la sesión
+            localStorage.setItem('usuarioActual', JSON.stringify(this.usuarioActual));
             return true;
         }
         return false;
@@ -26,7 +26,7 @@ class Auth {
 
     logout() {
         this.usuarioActual = null;
-        this.eliminarSesion();  // Eliminar la sesión almacenada
+        localStorage.removeItem('usuarioActual');
     }
 
     obtenerUsuarioActual() {
@@ -41,8 +41,29 @@ class Auth {
         return this.usuarioActual && this.usuarioActual.rol === 'admin_principal';
     }
 
-    // Métodos para gestionar usuarios
+    validarNombreApellido(nombre) {
+        const regex = /^[a-zA-Z]+$/;
+        return regex.test(nombre);
+    }
+
+    validarClave(clave) {
+        const regex = /^(?=.*[A-Za-z]{4,})(?=.*[0-9!@#\$%\^\&*\)\(+=._-]{2,}).{4,10}$/;
+        return regex.test(clave);
+    }
+
     registrarUsuario(nombre, apellido, usuario, contraseña, codigoVendedor, rol) {
+        if (!this.validarNombreApellido(nombre) || !this.validarNombreApellido(apellido)) {
+            throw new Error('Nombre y apellido deben contener solo letras.');
+        }
+        if (!this.validarClave(contraseña)) {
+            throw new Error('La contraseña debe tener entre 4 y 10 caracteres, con al menos 4 letras y 2 números o caracteres especiales.');
+        }
+        if (rol === 'vendedor' && !codigoVendedor) {
+            throw new Error('El código de vendedor es obligatorio para el rol de vendedor.');
+        }
+        if (!['admin', 'vendedor', 'cajero'].includes(rol)) {
+            throw new Error('Rol no válido');
+        }
         const nuevoId = Math.max(...this.usuarios.map(u => u.id)) + 1;
         const nuevoUsuario = { id: nuevoId, nombre, apellido, usuario, contraseña, codigoVendedor, rol, activo: true };
         this.usuarios.push(nuevoUsuario);
@@ -72,19 +93,5 @@ class Auth {
             this.usuarios = this.usuarios.filter(u => u.id !== id);
             this.guardarUsuarios();
         }
-    }
-
-    // Métodos para gestionar la sesión
-    guardarSesion(user) {
-        localStorage.setItem('usuarioActual', JSON.stringify(user));
-    }
-
-    cargarSesion() {
-        const user = localStorage.getItem('usuarioActual');
-        return user ? JSON.parse(user) : null;
-    }
-
-    eliminarSesion() {
-        localStorage.removeItem('usuarioActual');
     }
 }
