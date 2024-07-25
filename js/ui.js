@@ -36,7 +36,6 @@ class UI {
         this.agregarEventosNavegacion();
     }
     
-
     agregarEventosNavegacion() {
         if (document.getElementById('nueva-venta')) {
             document.getElementById('nueva-venta').addEventListener('click', () => this.app.mostrarNuevaVenta());
@@ -83,15 +82,7 @@ class UI {
     
         this.agregarEventosCalculadora();
     }
-    
-    confirmarPago(venta, propina) {
-        venta.propina = propina;
-        venta.subtotal = venta.total + propina;
-        this.app.ventas.actualizarVenta(venta);
-        alert('Pago confirmado');
-        this.resetearInterfaz();
-    }
-    
+        
     agregarEventosCalculadora() {
         const teclas = document.querySelectorAll('.tecla');
         const monto = document.getElementById('monto');
@@ -123,11 +114,13 @@ class UI {
         agregar.addEventListener('click', () => {
             if (monto.value) {
                 try {
-                    const resultado = eval(monto.value);
+                    const resultado = math.evaluate(monto.value);
+                    console.log('Resultado del cálculo:', resultado);
                     this.app.ventas.agregarItem(parseFloat(resultado));
                     this.mostrarVistaPrevia();
                     monto.value = '';
                 } catch (e) {
+                    console.error('Error al calcular:', e);
                     monto.value = 'Error';
                 }
             }
@@ -143,18 +136,18 @@ class UI {
         const vistaPrevia = document.getElementById('vista-previa');
         const items = this.app.ventas.ventaActual.items;
         let html = '';
-
+    
         items.forEach((item, index) => {
             html += `
                 <div class="item-venta">
-                    <span>$${item.toLocaleString('es-CL')}</span> 
+                    <span>$${item.toLocaleString('es-CL')}</span>
                     <button class="eliminar-monto" onclick="app.ui.eliminarItemVenta(${index})">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             `;
         });
-
+    
         vistaPrevia.innerHTML = html;
     }
 
@@ -191,6 +184,7 @@ class UI {
                     <span>$${venta.subtotal.toLocaleString('es-CL')}</span> <!--Monto peso Chileno-->
                 </div>
             <hr>
+
             <div class="codigo-barra-container">
                  <svg id="barcode"></svg>
                 </div>
@@ -207,7 +201,7 @@ class UI {
         displayValue: true,
         textAlign: "center",
         fontSize: 12,
-       height: 40,
+        height: 40,
         width: 2,
         margin: 10,
     });
@@ -529,6 +523,8 @@ class UI {
         alert('Pago confirmado');
         this.resetearInterfaz();
     }
+
+
     
 }
 
