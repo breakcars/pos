@@ -206,16 +206,9 @@ class UI {
         margin: 10,
     });
     
-        document.getElementById('imprimir-boleta').addEventListener('click', () => {
-    // Primero, intentamos imprimir usando el método estándar
-    window.print();
-    
-    // Luego, después de un pequeño retraso, abrimos el enlace para la impresión Bluetooth
-    setTimeout(() => {
-        const url = 'my.bluetoothprint.scheme://https://breakcars.github.io/pos/test.json';
-        window.location.href = url;
-    }, 100); // Retraso de 100 milisegundos
-});
+         document.getElementById('imprimir-boleta').addEventListener('click', () => {
+            window.print();
+        });
     
         document.getElementById('volver-atras').addEventListener('click', () => {
             this.mostrarNuevaVenta();
